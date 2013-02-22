@@ -1,0 +1,67 @@
+<script src="class.js"></script>
+
+<script>
+
+ var man  = $Class.create({
+     //构造方法
+     __:function(m){
+         this.name = m||"uname";
+
+         //私有属性
+         var money = 100;
+         //私有方法
+         function buy(){
+
+         }
+         this.getmoney = function(){
+             return money;
+         }
+     },
+     //共有属性
+     sex:"男",
+     //共有方法
+     showname:function(){
+       alert(this.name);
+     }
+ });
+
+ var m = new man("abc");
+
+ console.log(m);
+
+
+
+
+var chunGe = $Class.inherit(man,{
+     __:function(m){
+         this.type = m||"chunGe";
+
+         //私有属性
+         var money = 500,baqi = 10;
+         this.getmoney = function(){
+             alert(money);
+         };
+         this.baqi = function(){
+             alert(baqi);
+         }
+     },
+     alse:function(){
+       alert(this.sex);
+     }
+ });
+
+
+
+	var c = new chunGe("chunchun");
+	console.log(c);
+
+     //检测c是否为chunGe的实例
+     console.log(c instanceof chunGe);
+     //检测c是否为man的实例
+     console.log(c instanceof man);
+     //构造函数
+     console.log(c.constructor);
+     //构造函数
+     console.log(c.constructor.$super);
+
+</script>
