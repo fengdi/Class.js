@@ -49,6 +49,23 @@
 			return obj;
 		},
 		/**
+	     * 实例化类 可以替代 new 操作符
+	     *
+	     * @param {Function(Class)} cls 类
+	     * @param {Array} [args] 参数
+	     * @return {Object} 返回构建的实例
+	     * @doc
+	     */
+		"new":function(cls, args){
+			var obj = {};
+			for(var p in cls.prototype){
+				obj[p] = cls.prototype[p];
+			}
+			obj.__proto__ = cls.prototype;
+			cls.apply(obj, args||[]);
+			return obj;
+		}
+		/**
 	     * 继承  混合对象冒充原型链方式.
 	     *
 	     * @param {Function(Class)} source 父类
