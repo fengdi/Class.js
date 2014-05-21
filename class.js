@@ -1,23 +1,48 @@
-// Class.js 1.3.0
+// Class.js 1.4.0
 // author Tangoboy
 // http://www.cnblogs.com/tangoboy/archive/2010/08/03/1790412.html
 // Dual licensed under the MIT or GPL Version 2 licenses.
 
-;(function(host){
+(function(root, factory) {
 
+  // Set up $Class appropriately for the environment. Start with AMD.
+  if (typeof define === 'function' && define.amd) {
+    define(function() {
+      // Export global even in AMD case in case this script is loaded with
+      // others that may still expect a global Backbone.
+      return root.$Class = factory(root);
+    });
+
+  // Next for Node.js or CommonJS.
+  } else if (typeof exports !== 'undefined') {
+
+    factory(exports);
+
+  // Finally, as a browser global.
+  } else {
+  	
+    root.$Class = factory(root);
+  }
+
+}(this, function(host){
 	var opt = Object.prototype.toString,
+	isStr = function(s){return opt.call(s)==="[object String]"},
 	isFun = function(f){return opt.call(f)==="[object Function]"},
-	isObj = function(o){return opt.call(o)==="[object Object]"};
-
-	function createObject(proto, constructor) {
-		var newProto,
+	isObj = function(o){return opt.call(o)==="[object Object]"},
+	clone = function(o){
+		var newO,
 			noop = function(){};
 		if (Object.create) {
-			newProto = Object.create(proto);
+			newO = Object.create(o);
 		} else {
-			noop.prototype = proto;
-			newProto = new noop();
+			noop.prototype = o;
+			newO = new noop();
 		}
+		return newO;
+	};
+
+	function createPrototype(proto, constructor) {
+		var newProto = clone(proto);
 		newProto.constructor = constructor;
 		return newProto;
 	}
@@ -29,7 +54,45 @@
 		return r;
 	}
 
+	//无new实例化 构造函数包裹 使类同时支持 new A() 或 A() 实例化
+	function wrapConstructor(constructor){
+		return function(){
+			var selfConstructor = arguments.callee;
+			if(this instanceof selfConstructor){
+				constructor.apply(this, arguments);
+				return this;
+			}else{
+				return $Class['new'](selfConstructor, arguments);
+			}
+		};
+	}
+
+
+	var config = {
+		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数
+		notUseNew:true,             //是否可以不使用new直接调用方法实例化对像 如：A()
+		useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
+		useSuper:true               //是否让类有$super属性访问父类成员 如：B.$super.foo()
+	};
+
+
+
 	var $Class = {
+		/**
+	     * 配置类.
+	     *
+	     * @param {String|Object|null} c 某个配置项名|设置配置项|空值
+	     * @return {Mixed|Object|Object} 取出某个配置项|混合后的设置配置项|取出所有配置
+	     * @doc
+	     */
+		config:function(c){
+			if(isStr(c)){
+				return config[c];
+			}else if(isObj(c)){
+				return config = mix(config, c);
+			}
+			return config;
+		},
 		/**
 	     * 创建一个类  混合构造函数/原型方式.
 	     *
@@ -38,15 +101,7 @@
 	     * @doc
 	     */
 		create: function(data) {
-			var obj = data.__ || function(){};
-			//过滤构造方法和原型方法
-			delete data.__;
-			this.include(obj, data);
-
-			//添加父类属性
-			obj.$super = createObject({}, Object); 
-			
-			return obj;
+			return $Class.inherit($Class.Base, data);
 		},
 		/**
 	     * 实例化类 可以替代 new 操作符
@@ -57,46 +112,58 @@
 	     * @doc
 	     */
 		"new":function(cls, args){
-			var obj = {};
-			for(var p in cls.prototype){
-				obj[p] = cls.prototype[p];
-			}
-			obj.__proto__ = cls.prototype;
-			cls.apply(obj, args||[]);
-			return obj;
-		}
+			var instance = clone(cls.prototype);
+			cls.apply(instance, args||[]);
+			return instance;
+		},
 		/**
 	     * 继承  混合对象冒充原型链方式.
 	     *
 	     * @param {Function(Class)} source 父类
 	     * @param {Object} [extd] 定义类成员的对象
-	     * @param {Boolean} [execsuperc] 当子类被实例化时是否先执行父类构造函数
+	     * @param {Boolean} [execsuperc] 默认false 当子类被实例化时是否先执行父类构造函数
 	     * @return {Function(Class)} 返回创建的子类
 	     * @doc
 	     */
 		inherit:function(source, extd, execsuperc) {
 			if(!isFun(source))return;
-			execsuperc = execsuperc===false ? false : true;
+			extd = extd || {};
+			execsuperc = execsuperc||config.autoSuperConstructor;
 			var obj = extd.__ || function(){};
 			//过滤构造方法和原型方法
 			delete extd.__;
 			//对象冒充
-			var exobj = execsuperc ? function(){
-				source.apply(this,arguments);
-				obj.apply(this,arguments);
-			} : function(){
-				obj.apply(this,arguments);
+			var constructor = function(){
+				if(execsuperc){
+					source.apply(this, arguments);
+				}
+				obj.apply(this, arguments);
 			};
 
+			if(config.notUseNew){
+				//构造函数包裹 new A 和 A() 可以同时兼容
+				constructor = wrapConstructor(constructor);
+			}
+
+			constructor.name = obj.name;
+			constructor.length = obj.length;
+
 			//维持原型链
-			exobj.prototype = createObject(source.prototype, exobj);
+			constructor.prototype = createPrototype(source.prototype, constructor);
 			//原型扩展
-			this.include(exobj, source.prototype);
-			this.include(exobj, extd);
+			this.include(constructor, source.prototype);
+			this.include(constructor, extd);
 
 			//添加父类属性
-			exobj.$super = createObject(source.prototype, source);
-			return exobj;
+			constructor.$super = createPrototype(source.prototype, source);
+
+			if(config.useExtend){
+				constructor.$extend = function(extd, execsuperc){
+					return $Class.inherit(this, extd, execsuperc);
+				};
+			}
+
+			return constructor;
 		},
 		/**
 	     * 原型成员扩展.
@@ -112,15 +179,25 @@
 				mix(target.prototype, ptys);
 			}
 			return target;
-		}
+		},
+		/**
+	     * 克隆对象.
+	     *
+	     * @param {Object} o 需要克隆的对象
+	     * @return {Object} 返回克隆后的对象
+	     * @doc
+	     */
+		clone:clone
 	};
 
-	host.$Class = $Class;
-	
-	if(typeof define=="function" && define.amd){
-		define("class",[],function(){
-			return $Class;
-		});
-	}
 
-})(this);
+	//所有$Class.create的类Foo都继承自   Foo <= Base <= Object
+	//因此你可以通过$Class.Base.prototype拓展所有类
+
+	$Class.Base = $Class.inherit(Object);
+
+
+	return host.$Class = $Class;
+	
+
+}));

@@ -1,4 +1,4 @@
-Class.js
+Class.js v1.4.0
 ========
 
 oop javascript

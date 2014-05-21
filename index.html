@@ -1,8 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>class.js</title>
+</head>
+<body>
+    
 <script src="class.js"></script>
 
 <script>
 
- var man  = $Class.create({
+if(!("console" in window) || console == null){
+    var console = {};
+    console.log = function(){
+        alert([].slice.call(arguments).join(","))
+    };
+}
+
+
+// 配置项
+// $Class.config({
+//     autoSuperConstructor:true, //当子类被实例化时是否先执行父类构造函数
+//     notUseNew:true,             //是否可以不使用new直接调用方法实例化对像 如：A()
+//     useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
+//     useSuper:true               //是否让类有$super属性访问父类成员 如：B.$super.foo()
+// });
+
+
+///////////  例一 /////////////
+
+var Man = $Class.create({
      //构造方法
      __:function(m){
          this.name = m||"uname";
@@ -23,16 +50,16 @@
      showname:function(){
        alert(this.name);
      }
- });
+});
 
- var m = new man("abc");
-
- console.log(m);
-
-
+ var m = new Man("abc");
+ var m2 = Man('cde');
+ console.log(m, m2);
 
 
-var chunGe = $Class.inherit(man,{
+
+
+var ChunGe = $Class.inherit(Man,{
      __:function(m){
          this.type = m||"chunGe";
 
@@ -52,16 +79,52 @@ var chunGe = $Class.inherit(man,{
 
 
 
-	var c = new chunGe("chunchun");
-	console.log(c);
+
+ var c = new ChunGe("chunchun");
+    var c2 = ChunGe("cc");
 
      //检测c是否为chunGe的实例
-     console.log(c instanceof chunGe);
+     console.log(c instanceof ChunGe);
      //检测c是否为man的实例
-     console.log(c instanceof man);
+     console.log(c instanceof Man);
      //构造函数
      console.log(c.constructor);
-     //构造函数
+     //父类
      console.log(c.constructor.$super);
 
+
+
+///////////  例二 /////////////
+
+
+var A = $Class.create({
+    __:function(){
+        console.log("A");
+    },
+    foo:function(){
+        console.log("这是父类的方法")
+    }
+});
+
+
+//继承的第二种用法 直接通过 A.$extend
+
+var B = A.$extend({
+    __:function(){
+        console.log("B");
+
+        B.$super.foo.apply(this);
+    }
+}, true);//这里的true会导致实例化时A的构造也会被执行（相当于配置了autoSuperConstructor=true）
+
+
+var b = B();   //可以不需要用new
+
+
+console.log(b instanceof B, b instanceof A);
+
+
+
 </script>
+</body>
+</html>
