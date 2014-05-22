@@ -25,6 +25,9 @@
   }
 
 }(this, function(host){
+
+	//不能在严谨代码模式 'use strict';
+
 	var opt = Object.prototype.toString,
 	isStr = function(s){return opt.call(s)==="[object String]"},
 	isFun = function(f){return opt.call(f)==="[object Function]"},
@@ -69,7 +72,7 @@
 
 
 	var config = {
-		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数
+		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数 设置后仅对后面声明的类有效
 		notUseNew:true,             //是否可以不使用new直接调用方法实例化对像 如：A()
 		useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
 		useSuper:true               //是否让类有$super属性访问父类成员 如：B.$super.foo()

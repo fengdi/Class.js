@@ -26,7 +26,6 @@ if(!("console" in window) || console == null){
 //     useSuper:true               //是否让类有$super属性访问父类成员 如：B.$super.foo()
 // });
 
-
 ///////////  例一 /////////////
 
 var Man = $Class.create({
@@ -100,9 +99,6 @@ var ChunGe = $Class.inherit(Man,{
 var A = $Class.create({
     __:function(){
         console.log("A");
-    },
-    foo:function(){
-        console.log("这是父类的方法")
     }
 });
 
@@ -112,8 +108,6 @@ var A = $Class.create({
 var B = A.$extend({
     __:function(){
         console.log("B");
-
-        B.$super.foo.apply(this);
     }
 }, true);//这里的true会导致实例化时A的构造也会被执行（相当于配置了autoSuperConstructor=true）
 
