@@ -1,4 +1,4 @@
-// Class.js 1.4.0
+// Class.js 1.4.1
 // author Tangoboy
 // http://www.cnblogs.com/tangoboy/archive/2010/08/03/1790412.html
 // Dual licensed under the MIT or GPL Version 2 licenses.
@@ -43,20 +43,19 @@
 		}
 		return newO;
 	};
-
+	//创建一个原型对象，创建的是一次克隆
 	function createPrototype(proto, constructor) {
 		var newProto = clone(proto);
 		newProto.constructor = constructor;
 		return newProto;
 	}
-
+	//混杂
 	function mix(r, s) {
 		for (var i in s) {
 			r[i] = s[i];
 		}
 		return r;
 	}
-
 	//无new实例化 构造函数包裹 使类同时支持 new A() 或 A() 实例化
 	function wrapConstructor(constructor){
 		return function(){
@@ -75,19 +74,22 @@
 		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数 设置后仅对后面声明的类有效
 		notUseNew:true,             //是否可以不使用new直接调用方法实例化对像 如：A()
 		useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
-		useSuper:true               //是否让类有$super属性访问父类成员 如：B.$super.foo()
+		useSuper:true,              //是否让类有$super属性访问父类成员 如：B.$super.foo()
+		disguise:true               //是否让代码生成的构造函数伪装成定义的__:function(){}
 	};
 
 
 
 	var $Class = {
+		Base:null,//作用见后面赋值
+
 		/**
-	     * 配置类.
-	     *
-	     * @param {String|Object|null} c 某个配置项名|设置配置项|空值
-	     * @return {Mixed|Object|Object} 取出某个配置项|混合后的设置配置项|取出所有配置
-	     * @doc
-	     */
+		 * 配置方法 对某些功能设置是否开启.
+		 *
+		 * @param {String|Object|null} c 某个配置项名|设置配置项|空值
+		 * @return {Mixed|Object|Object} 取出某个配置项|混合后的设置配置项|取出所有配置
+		 * @doc
+		 */
 		config:function(c){
 			if(isStr(c)){
 				return config[c];
@@ -97,47 +99,47 @@
 			return config;
 		},
 		/**
-	     * 创建一个类  混合构造函数/原型方式.
-	     *
-	     * @param {Object} data 定义类成员的对象
-	     * @return {Function(Class)} 返回创建的类
-	     * @doc
-	     */
+		 * 创建一个类  混合构造函数/原型方式.
+		 *
+		 * @param {Object} data 定义类成员的对象
+		 * @return {Function(Class)} 返回创建的类
+		 * @doc
+		 */
 		create: function(data) {
 			return $Class.inherit($Class.Base, data);
 		},
 		/**
-	     * 实例化类 可以替代 new 操作符
-	     *
-	     * @param {Function(Class)} cls 类
-	     * @param {Array} [args] 参数
-	     * @return {Object} 返回构建的实例
-	     * @doc
-	     */
-		"new":function(cls, args){
-			var instance = clone(cls.prototype);
-			cls.apply(instance, args||[]);
+		 * 实例化类 可以替代 new 操作符
+		 *
+		 * @param {Function(Class)} clas 类
+		 * @param {Array} [args] 参数
+		 * @return {Object} 返回构建的实例
+		 * @doc
+		 */
+		"new":function(clas, args){
+			var instance = clone(clas.prototype);
+			clas.apply(instance, args||[]);
 			return instance;
 		},
 		/**
-	     * 继承  混合对象冒充原型链方式.
-	     *
-	     * @param {Function(Class)} source 父类
-	     * @param {Object} [extd] 定义类成员的对象
-	     * @param {Boolean} [execsuperc] 默认false 当子类被实例化时是否先执行父类构造函数
-	     * @return {Function(Class)} 返回创建的子类
-	     * @doc
-	     */
-		inherit:function(source, extd, execsuperc) {
+		 * 继承  混合对象冒充原型链方式.
+		 *
+		 * @param {Function(Class)} source 父类
+		 * @param {Object} [extend] 定义类成员的对象
+		 * @param {Boolean} [autoSuperConstructor] 默认false 当子类被实例化时是否先执行父类构造函数
+		 * @return {Function(Class)} 返回创建的子类
+		 * @doc
+		 */
+		inherit:function(source, extend, autoSuperConstructor) {
 			if(!isFun(source))return;
-			extd = extd || {};
-			execsuperc = execsuperc||config.autoSuperConstructor;
-			var obj = extd.__ || function(){};
+			extend = extend || {};
+			autoSuperConstructor = autoSuperConstructor||config.autoSuperConstructor;
+			var obj = extend.__ || function(){};
 			//过滤构造方法和原型方法
-			delete extd.__;
+			delete extend.__;
 			//对象冒充
 			var constructor = function(){
-				if(execsuperc){
+				if(autoSuperConstructor){
 					source.apply(this, arguments);
 				}
 				obj.apply(this, arguments);
@@ -147,56 +149,84 @@
 				//构造函数包裹 new A 和 A() 可以同时兼容
 				constructor = wrapConstructor(constructor);
 			}
-
-			constructor.name = obj.name;
-			constructor.length = obj.length;
-
-			//维持原型链
-			constructor.prototype = createPrototype(source.prototype, constructor);
-			//原型扩展
-			this.include(constructor, source.prototype);
-			this.include(constructor, extd);
+			if(config.disguise){
+				constructor.name = obj.name;
+				constructor.length = obj.length;
+				constructor.toString = function(){return obj.toString()};//屏蔽了构造函数的实现
+			}
+			//维持原型链 把父类的成员加入到原型上
+			this.include(constructor, createPrototype(source.prototype, constructor));
+			//原型扩展 把最后配置的成员加入到原型上
+			this.include(constructor, extend);
 
 			//添加父类属性
 			constructor.$super = createPrototype(source.prototype, source);
 
 			if(config.useExtend){
-				constructor.$extend = function(extd, execsuperc){
-					return $Class.inherit(this, extd, execsuperc);
+				constructor.$extend = function(extend, execsuperc){
+					return $Class.inherit(this, extend, execsuperc);
 				};
 			}
 
 			return constructor;
 		},
 		/**
-	     * 原型成员扩展.
-	     *
-	     * @param {Function(Class)} target 需要被原型拓展的类
-	     * @param {Object} [ptys] 定义原型成员的对象
-	     * @return {Function(Class)} 返回被拓展的类
-	     * @doc
-	     */
-		include:function(target, ptys){
+		 * 原型成员扩展.
+		 *
+		 * @param {Function(Class)} target 需要被原型拓展的类
+		 * @param {Object} [protos] 定义原型成员的对象
+		 * @return {Function(Class)} 返回被拓展的类
+		 * @doc
+		 */
+		include:function(target, protos){
 			if(!isFun(target)){target = function(){};}
-			if(isObj(ptys)){
-				mix(target.prototype, ptys);
+			if(isObj(protos)){
+				mix(target.prototype, protos);
 			}
 			return target;
 		},
 		/**
-	     * 克隆对象.
-	     *
-	     * @param {Object} o 需要克隆的对象
-	     * @return {Object} 返回克隆后的对象
-	     * @doc
-	     */
-		clone:clone
+		 * 克隆对象.
+		 *
+		 * @param {Object} o 需要克隆的对象
+		 * @return {Object} 返回克隆后的对象
+		 * @doc
+		 */
+		clone:clone,
+		/**
+		 * 获取某个类的成员 会从原型链上遍历获取.
+		 *
+		 * @param {Object} clas 类
+		 * @return {Array} 返回该类整个原型链上的成员
+		 * @doc
+		 */
+		member:function(clas){
+			if(!isFun(clas))return;
+			var member = [];
+			var m = {constructor:1};
+			var chain = clas.prototype;
+			for (;chain && chain.constructor;){
+				for(var k in chain){
+					m[k] = 1;
+				}
+				if(chain.constructor==clas || chain.constructor==Object){
+					//链为循环 或者 链到达Object 结束
+					//不在Object原型上去循环了Object.prototype.constructor == Object
+					break;
+				}
+				chain = chain.constructor.prototype;
+			};
+			for(var i in m){
+				member.push(i);
+			}
+			return member;
+		}
 	};
 
-
-	//所有$Class.create的类Foo都继承自   Foo <= Base <= Object
-	//因此你可以通过$Class.Base.prototype拓展所有类
-
+	// Base
+	// 所有$Class.create的类Foo都继承自$Class.Base     Foo <= Base <= Object
+	// 因此你可以通过$Class.Base.prototype拓展所有create出来的类
+	//
 	$Class.Base = $Class.inherit(Object);
 
 
