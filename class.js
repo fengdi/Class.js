@@ -74,7 +74,7 @@
 
 	var config = {
 		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数 设置后仅对后面声明的类有效
-		notUseNew:true,             //是否可以不使用new直接调用方法实例化对像 如：A()
+		notUseNew:true,             //是否可以不使用关键字new 直接调用方法实例化对象 如：A()
 		useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
 		useSuper:true,              //是否让类有$super属性访问父类成员 如：B.$super.foo()
 		disguise:false,             //是否让代码生成的构造函数伪装成定义的__:function(){}
@@ -119,9 +119,13 @@
 		 * @doc
 		 */
 		"new":function(clas, args){
-			var instance = clone(clas.prototype);
-			var re = clas.apply(instance, args||[]);
-			return isObj(re) ? re : instance;
+			if(isFun(clas)){
+				var instance = clone(clas.prototype);
+				var re = clas.apply(instance, args||[]);
+				return isObj(re) ? re : instance;
+			}else{
+				throw new Error('fatal error: $Class.new expects a constructor of class.');  
+			}
 		},
 		/**
 		 * 继承  混合对象冒充原型链方式.
@@ -216,7 +220,7 @@
 		 */
 		singleton:function(obj){
 			var singletonClass;
-			return singletonClass = $Class.create(mix(obj, {
+			return singletonClass = $Class.create(mix(obj||{}, {
 				__:function(){
 					if(singletonClass.$instance instanceof singletonClass){
 						return singletonClass.$instance;
