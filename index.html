@@ -52,7 +52,7 @@ var Man = $Class.create({
 });
 
  var m = new Man("abc");
- var m2 = Man('cde');
+ var m2 = Man('cde'); //new 可略
  console.log(m, m2);
 
 
@@ -80,7 +80,7 @@ var ChunGe = $Class.inherit(Man,{
 
 
  var c = new ChunGe("chunchun");
-    var c2 = ChunGe("cc");
+    var c2 = ChunGe("cc");  //new 可略
 
      //检测c是否为chunGe的实例
      console.log(c instanceof ChunGe);
@@ -119,6 +119,22 @@ console.log(b instanceof B, b instanceof A);
 
 
 
+////////// 单例 //////////////
+
+var S = $Class.singleton({name:"一个单例"});
+var s1 = S();   //同样new可略
+var s2 = new S();
+
+console.log("单例类的两个实例是否相等",s1===s2);
+
+var SubS = S.$extend({
+    sub:"子类继承单例类"
+});
+
+var s3 = SubS();
+var s4 = SubS();
+
+console.log("单例类可以继承，子类实例是否相等",s3===s4, s3, s4);
 
 </script>
 </body>

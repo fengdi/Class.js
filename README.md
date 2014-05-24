@@ -1,5 +1,7 @@
-Class.js v1.4.0
+Class.js v1.4.2
 ========
+
+api可以查看源码了解
 
 oop javascript
 
