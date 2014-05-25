@@ -10,86 +10,136 @@
 
 <script>
 
+'use strict';
+
 if(!("console" in window) || console == null){
     var console = {};
     console.log = function(){
-        alert([].slice.call(arguments).join(","))
+        document.write([].slice.call(arguments).join(",") + "<br>")
     };
 }
 
 
+console.log("==================定义类（原生）===================");
+(function(){
 
-console.log("=====================================");
+    var  AAA = function(){
+        this.a = 1+2;
+    };
+    AAA.prototype.aa = function() {
+        console.log('aa');
+    };
+    AAA.prototype.constructor = AAA;
 
-var  AAA = function(){
-    this.a = 1+2;
-};
-AAA.prototype.aa = function() {
-    console.log('aa');
-};
-AAA.prototype.constructor = AAA;
+    var a1 = new AAA();
+    var a2 = $Class['new'](AAA);
+    AAA.apply(a2);
 
-var a1 = new AAA();
-var a2 = $Class['new'](AAA);
-AAA.apply(a2);
+    console.log(a1, a1.constructor,  a2, a2 instanceof AAA);
 
-console.log(a1, a1.constructor,  a2, a2 instanceof AAA);
+    for(var j in a1){
+        console.log(j, a1[j]);
+    }
+    for(var k in a2){
+        console.log(k, a2[k]);
+    }
 
-for(var j in a1){
-    console.log(j, a1[j]);
-}
-for(var k in a2){
-    console.log(k, a2[k]);
-}
-console.log("=====================================");
+    console.log(a1.a==3, a2.a==3);
+
+})();
+
+
+console.log("==================定义类（$Class.create）===================");
+(function(){
+    $Class.config({
+        disguise:true
+    });
+    
+
+    var BBB = $Class.create({
+        __:function(){
+            this.a = 1+2;
+        },
+        aa:function(){
+            console.log('aa')
+        }
+    });
+
+    var b1 = new BBB();
+    var b2 = $Class['new'](BBB);
+    BBB.apply(b2);
+
+    console.log(b1, b1.constructor,  b2, b2 instanceof BBB);
+
+    for(var j in b1){
+        console.log(j, b1[j]);
+    }
+    for(var k in b2){
+        console.log(k, b2[k]);
+    }
+
+    console.log(b1.a==3, b2.a==3);
+
+    console.log("");
+
+    console.log(b1.constructor.$super, b1.constructor.$extend, b1.constructor.$constructor)
+
+})();
+
+
+
+
+
+
+console.log("==================继承===================");
+(function(){
 
 var BBB = $Class.create({
     __:function(){
-        this.a = 1+2;
-    },
-    aa:function(){
-        console.log('aa')
+        this.colors = ['red', 'blue', 'green'];
     }
-});
-
-var b1 = new BBB();
-var b2 = $Class['new'](BBB);
-BBB.apply(b2);
-
-console.log(b1, b1.constructor,  b2, b2 instanceof BBB);
-
-for(var j in b1){
-    console.log(j, b1[j]);
-}
-for(var k in b2){
-    console.log(k, b2[k]);
-}
-
-console.log("=====================================");
+})
 
 var CCC = BBB.$extend({
+    __:function(){
+        CCC.$super.constructor.call(this);
+    },
     aa:function(){}
 });
 
+
+var b1 = new BBB();
+console.log("b1", b1);
+
+b1.colors.push("black");
+BBB.prototype.add = 1;
+
 var c1 = new CCC();
+c1.colors.push("yellow");
+
+
 var c2 = $Class['new'](CCC);
 CCC.apply(c2);
 
 console.log(c1, c1.constructor,  c2, c2 instanceof CCC);
 
-for(var j in c1){
-    console.log(j, c1[j]);
-}
-for(var k in c2){
-    console.log(k, c2[k]);
-}
 
 
+
+})();
+
+
+
+console.log("==================成员检测===================");
+(function(){
+
+var CCC = $Class.create({a:1, add:function(){}});    
 var D = CCC.$extend({bb:1});
 var E = D.$extend({cc:1});
 var F = E.$extend({dd:1});
 var G = F.$extend({ee:1});
 
+//CCC.prototype = G.prototype;//循环的链
 console.log($Class.member(G));
 
 
@@ -105,7 +155,7 @@ H.prototype={
                     constructor:{
                         prototype:{
                             c1:"c2",
-                            d1:"d1",
+                            d1:"d1",//覆盖属性
                             d2:"d2",
                             constructor:Object
                         }
@@ -116,22 +166,28 @@ H.prototype={
     }
     
 };
-//BBB.prototype = G.prototype;循环的链
+
 
 
 console.log($Class.member(H));
 
+})();
 
 
-console.log("=====================================");
+(function(){
+
+console.log("==================单例类===================");
 
 var S = $Class.singleton({a:1,C:"创建的一个单例"});
 
 var s1 = S();
 var s2 = new S();
 
-console.log(s1===s2);
+s1.Name = "foo";
 
+console.log(s1===s2, s1,s2 ,s2.Name);
+
+})();
 
 </script>
 </body>

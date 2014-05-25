@@ -64,7 +64,7 @@
 			var selfConstructor = arguments.callee;
 			if(this instanceof selfConstructor){
 				var re = constructor.apply(this, arguments);
-				return isObj(re)?re:this;
+				return re&&isObj(re) ? re : this;
 			}else{
 				return $Class['new'](selfConstructor, arguments);
 			}
@@ -122,7 +122,7 @@
 			if(isFun(clas)){
 				var instance = clone(clas.prototype);
 				var re = clas.apply(instance, args||[]);
-				return isObj(re) ? re : instance;
+				return re&&isObj(re) ? re : instance;
 			}else{
 				throw new Error('fatal error: $Class.new expects a constructor of class.');  
 			}
@@ -155,7 +155,7 @@
 					source.apply(this, arguments);
 				}
 				var re = defineConstructor.apply(this, arguments);
-				if(isObj(re))return re;
+				if(re && isObj(re))return re;
 			};
 
 			if(config.notUseNew){
