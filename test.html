@@ -19,6 +19,18 @@ if(!("console" in window) || console == null){
     };
 }
 
+var assert = function(value, msg){
+    if(!value){
+        throw(new Error(msg||(value+" does not equal true")));
+    }
+};
+
+var assertEqual = function(val1, val2, msg){
+    if(val1 !== val2){
+        throw(new Error(msg || (val1 + " does not equal " + val2)));
+    }
+};
+
 
 console.log("==================定义类（原生）===================");
 (function(){
@@ -35,6 +47,13 @@ console.log("==================定义类（原生）===================");
     var a2 = $Class['new'](AAA);
     AAA.apply(a2);
 
+    assert(a1.a == 3);
+    assert(a2.a == 3);
+    assert(a1 instanceof AAA);
+    assert(a2 instanceof AAA);
+    assert("aa" in a1);
+    assert("aa" in a2);
+
     console.log(a1, a1.constructor,  a2, a2 instanceof AAA);
 
     for(var j in a1){
@@ -46,6 +65,25 @@ console.log("==================定义类（原生）===================");
 
     console.log(a1.a==3, a2.a==3);
 
+
+    //
+    var A = function(){
+        return {'ff':1};
+    };
+
+    var a3 = new A();
+    var a4 = $Class['new'](A);
+    A.apply(a4);
+
+    console.log(a3, a4);
+
+
+    assert("ff" in a3);
+    assert("ff" in a4);
+    assert(a3.ff == 1);
+    assert(a4.ff == 1);
+
+
 })();
 
 
@@ -56,7 +94,7 @@ console.log("==================定义类（$Class.create）===================")
     });
     
 
-    var BBB = $Class.create({
+    var AAA = $Class.create({
         __:function(){
             this.a = 1+2;
         },
@@ -65,24 +103,53 @@ console.log("==================定义类（$Class.create）===================")
         }
     });
 
-    var b1 = new BBB();
-    var b2 = $Class['new'](BBB);
-    BBB.apply(b2);
+    var a1 = new AAA();
+    var a2 = $Class['new'](AAA);
+    AAA.apply(a2);
 
-    console.log(b1, b1.constructor,  b2, b2 instanceof BBB);
+    assert(a1.a == 3);
+    assert(a2.a == 3);
+    assert(a1 instanceof AAA);
+    assert(a2 instanceof AAA);
+    assert("aa" in a1);
+    assert("aa" in a2);
 
-    for(var j in b1){
-        console.log(j, b1[j]);
+
+
+    console.log(a1, a1.constructor,  a2, a2 instanceof AAA);
+
+    for(var j in a1){
+        console.log(j, a1[j]);
     }
-    for(var k in b2){
-        console.log(k, b2[k]);
+    for(var k in a2){
+        console.log(k, a2[k]);
     }
 
-    console.log(b1.a==3, b2.a==3);
+    console.log(a1.a==3, a2.a==3);
 
-    console.log("");
 
-    console.log(b1.constructor.$super, b1.constructor.$extend, b1.constructor.$constructor)
+
+    var A = $Class.create({
+        __:function(){
+            return {'ff':1};
+        }
+    });
+
+    var a3 = new A();
+    var a4 = A();
+
+    console.log(a3, a4);
+
+    assert("ff" in a3);
+    assert("ff" in a4);
+    assert(a3.ff == 1);
+    assert(a4.ff == 1);
+
+
+    console.log("拓展：");
+
+
+    console.log("$super:",a1.constructor.$super,"$extend:", a1.constructor.$extend,"$constructor:",a1.constructor.$constructor)
 
 })();
 
@@ -110,13 +177,17 @@ var CCC = BBB.$extend({
 
 var b1 = new BBB();
 console.log("b1", b1);
-
 b1.colors.push("black");
 BBB.prototype.add = 1;
+
+assert(b1.colors.length == 4);
+assert("add" in b1);
 
 var c1 = new CCC();
 c1.colors.push("yellow");
 
+assert(c1.colors.length == 4);
+assert(c1.colors[3] == 'yellow');
 
 var c2 = $Class['new'](CCC);
 CCC.apply(c2);
