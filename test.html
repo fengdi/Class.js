@@ -249,14 +249,20 @@ console.log($Class.member(H));
 
 console.log("==================单例类===================");
 
-var S = $Class.singleton({a:1,C:"创建的一个单例"});
+var S = $Class.singleton({
+    __:function(){
+        this.a = this.a + 1;
+    },
+    a:1,
+    C:"创建的一个单例"
+});
 
 var s1 = S();
 var s2 = new S();
 
 s1.Name = "foo";
 
-console.log(s1===s2, s1,s2 ,s2.Name);
+console.log(s1===s2, s1,s2 ,s2.Name, s2.a);
 
 })();
 

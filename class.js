@@ -1,17 +1,14 @@
-// Class.js 1.4.2
+// Class.js 1.4.3
 // author Tangoboy
 // http://www.cnblogs.com/tangoboy/archive/2010/08/03/1790412.html
 // Dual licensed under the MIT or GPL Version 2 licenses.
 
 (function(root, factory) {
 
-  // Set up $Class appropriately for the environment. Start with AMD.
-  if (typeof define === 'function' && define.amd) {
-    define(function() {
-      // Export global even in AMD case in case this script is loaded with
-      // others that may still expect a global Backbone.
-      return root.$Class = factory(root);
-    });
+  // Set up $Class appropriately for the environment. Start with AMD or TMD(Im.js)
+  if (typeof define === 'function' && (define.amd || define.tmd) ) {
+
+    define([], factory);
 
   // Next for Node.js or CommonJS.
   } else if (typeof exports !== 'undefined') {
@@ -20,8 +17,9 @@
 
   // Finally, as a browser global.
   } else {
-  	
-    root.$Class = factory(root);
+
+  	factory(root);
+
   }
 
 }(this, function(host){
@@ -150,7 +148,7 @@
 			//过滤构造方法和原型方法
 			delete extend.__;
 			//对象冒充
-			var constructor = function(){
+			var _constructor = function(){
 				if(autoSuperConstructor){
 					source.apply(this, arguments);
 				}
@@ -160,39 +158,39 @@
 
 			if(config.notUseNew){
 				//构造函数包裹 new A 和 A() 可以同时兼容
-				constructor = wrapConstructor(constructor);
+				_constructor = wrapConstructor(_constructor);
 			}
 			if(config.disguise){
-				constructor.name = defineConstructor.name;
-				constructor.length = defineConstructor.length;
-				constructor.toString = function(){return defineConstructor.toString()};//屏蔽了构造函数的实现
+				_constructor.name = defineConstructor.name;
+				_constructor.length = defineConstructor.length;
+				_constructor.toString = function(){return defineConstructor.toString()};//屏蔽了构造函数的实现
 			}
 			//维持原型链 把父类原型赋值到给构造器原型，维持原型链
 			if(isSupport__proto__){ 
-				constructor.prototype.__proto__ = source.prototype;
+				_constructor.prototype.__proto__ = source.prototype;
 			}else{
-				constructor.prototype = createPrototype(source.prototype, constructor);
+				_constructor.prototype = createPrototype(source.prototype, _constructor);
 			}
 			//原型扩展 把最后配置的成员加入到原型上
-			this.include(constructor, extend);
+			this.include(_constructor, extend);
 
 			if(config.useSuper){
 				//添加父类属性
-				constructor.$super = createPrototype(source.prototype, source);
+				_constructor.$super = createPrototype(source.prototype, source);
 			}
 
 			if(config.useSuper){
 				//添加定义的构造函数
-				constructor.$constructor = defineConstructor;
+				_constructor.$constructor = defineConstructor;
 			}
 
 			if(config.useExtend){
-				constructor.$extend = function(extend, execsuperc){
+				_constructor.$extend = function(extend, execsuperc){
 					return $Class.inherit(this, extend, execsuperc);
 				};
 			}
 
-			return constructor;
+			return _constructor;
 		},
 		/**
 		 * 原型成员扩展.
@@ -220,8 +218,10 @@
 		 */
 		singleton:function(obj){
 			var singletonClass;
+			var _constructor = obj.__ || function(){};
 			return singletonClass = $Class.create(mix(obj||{}, {
 				__:function(){
+					_constructor.apply(this, arguments);
 					if(singletonClass.$instance instanceof singletonClass){
 						return singletonClass.$instance;
 					}else{
@@ -281,8 +281,11 @@
 	// 你也可以删除$Class.Base 或者 $Class.Base = null 这样就可以改变继承为 Foo <= Object
 	$Class.Base = $Class.inherit(Object);
 
+	if(host){
+		host.$Class = $Class;
+	}
 
-	return host.$Class = $Class;
+	return $Class;
 	
 
 }));

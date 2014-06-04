@@ -23,7 +23,8 @@ if(!("console" in window) || console == null){
 //     autoSuperConstructor:true, //当子类被实例化时是否先执行父类构造函数
 //     notUseNew:true,             //是否可以不使用new直接调用方法实例化对像 如：A()
 //     useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
-//     useSuper:true               //是否让类有$super属性访问父类成员 如：B.$super.foo()
+//     useSuper:true,              //是否让类有$super属性访问父类成员 如：B.$super.foo()
+//     useConstructor:true         //是否使用B.$constructor来保存定义的__构造函数，这里create inherit生成的构造函数是不等于__的
 // });
 
 ///////////  例一 /////////////
