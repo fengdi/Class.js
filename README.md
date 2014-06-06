@@ -40,6 +40,7 @@ oop javascript
 
 ## API ##
 
+Class.js统一的访问命名是$Class, 当你使用此库时，应该$Class.xxx(...)来调用API
 
 #### 1.创建一个类 ####
 
