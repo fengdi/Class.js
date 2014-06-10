@@ -28,9 +28,10 @@
 
 	var uuid = 0,
 	opt = Object.prototype.toString,
-	isStr = function(s){return opt.call(s)==="[object String]"},
-	isFun = function(f){return opt.call(f)==="[object Function]"},
-	isObj = function(o){return opt.call(o)==="[object Object]"},
+	isStr = function(s){return opt.call(s)=="[object String]"},
+	isFun = function(f){return opt.call(f)=="[object Function]"},
+	isObj = function(o){return opt.call(o)=="[object Object]"},
+    isArr = function(a){return opt.call(a)=="[object Array]"},
 	isSupport__proto__ = ({}).__proto__ == Object.prototype,//检验__proto__特性
 	clone = function(obj){
 		var newObj,
@@ -60,7 +61,7 @@
 	function wrapConstructor(constructor){
 		return function(){
 			var selfConstructor = arguments.callee;
-			if(this instanceof selfConstructor){
+			if(this && this instanceof selfConstructor && this.constructor == selfConstructor){
 				var re = constructor.apply(this, arguments);
 				return re&&isObj(re) ? re : this;
 			}else{
@@ -74,6 +75,7 @@
 		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数 设置后仅对后面声明的类有效
 		notUseNew:true,             //是否可以不使用关键字new 直接调用方法实例化对象 如：A()
 		useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
+        useMixin:true,              //是否使用让类拥有混入其他原型的方法 如：A.$mixin([C.prototype, D.prototype])
 		useSuper:true,              //是否让类有$super属性访问父类成员 如：B.$super.foo()
 		disguise:false,             //是否让代码生成的构造函数伪装成定义的__:function(){}
 		useConstructor:true         //是否使用B.$constructor来保存定义的__构造函数，这里create inherit生成的构造函数是不等于__的
@@ -171,6 +173,7 @@
 			}else{
 				_constructor.prototype = createPrototype(source.prototype, _constructor);
 			}
+            
 			//原型扩展 把最后配置的成员加入到原型上
 			this.include(_constructor, extend);
 
@@ -189,6 +192,12 @@
 					return $Class.inherit(this, extend, execsuperc);
 				};
 			}
+            
+            if(config.useMixin){
+				_constructor.$mixin = function(protos){
+					return $Class.include(this, protos);
+				};
+			}
 
 			return _constructor;
 		},
@@ -196,7 +205,7 @@
 		 * 原型成员扩展.
 		 *
 		 * @param {Function(Class)} target 需要被原型拓展的类
-		 * @param {Object} [protos] 定义原型成员的对象
+		 * @param {Object|Array} [protos] 定义原型成员的对象或多个原型对象的数组
 		 * @return {Function(Class)} 返回被拓展的类
 		 * @doc
 		 */
@@ -204,7 +213,13 @@
 			if(!isFun(target)){target = function(){};}
 			if(isObj(protos)){
 				mix(target.prototype, protos);
-			}
+			}else if(isArr(protos)){
+                for(var i = 0; i<protos.length; i++){
+                    if(isObj(protos[i])){
+                        mix(target.prototype, protos[i]);
+                    }
+                }
+            }
 			return target;
 		},
 		/**

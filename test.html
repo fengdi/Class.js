@@ -144,8 +144,7 @@ console.log("==================定义类（$Class.create）===================")
     assert("ff" in a4);
     assert(a3.ff == 1);
     assert(a4.ff == 1);
-
-
+    
     console.log("拓展：");
 
 
@@ -188,12 +187,16 @@ c1.colors.push("yellow");
 
 assert(c1.colors.length == 4);
 assert(c1.colors[3] == 'yellow');
+assert(c1.constructor === CCC);
+assert(c1.constructor.prototype === CCC.prototype);
 
 var c2 = $Class['new'](CCC);
 CCC.apply(c2);
 
 console.log(c1, c1.constructor,  c2, c2 instanceof CCC);
 
+assert(c2.constructor === CCC);
+assert(c2.constructor.prototype === CCC.prototype);
 
 
 
