@@ -83,6 +83,19 @@
 
 
 	var $Class = {
+        
+        /**
+		 * UUID方法 生成唯一的id字符串
+		 *
+		 * @param {String} [prefix] id前缀
+		 * @return {String} 唯一的id字符串
+		 * @doc
+		 */
+        uuid:function(prefix){
+            return (prefix||"cls_") + (+new Date()).toString( 32 ) + (uuid++).toString( 32 );
+        },
+        
+        
 		Base:null,//作用见后面赋值
 
 		/**
