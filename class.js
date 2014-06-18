@@ -61,7 +61,7 @@
 	function wrapConstructor(constructor){
 		return function(){
 			var selfConstructor = arguments.callee;
-			if(this && this instanceof selfConstructor && this.constructor == selfConstructor){
+			if(this && this instanceof selfConstructor){// && this.constructor == selfConstructor
 				var re = constructor.apply(this, arguments);
 				return re&&isObj(re) ? re : this;
 			}else{
