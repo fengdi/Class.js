@@ -1,26 +1,26 @@
-// Class.js 1.4.3
+// Class.js 1.4.4
 // author Tangoboy
 // http://www.cnblogs.com/tangoboy/archive/2010/08/03/1790412.html
 // Dual licensed under the MIT or GPL Version 2 licenses.
 
 (function(root, factory) {
 
-  // Set up $Class appropriately for the environment. Start with AMD or TMD(Im.js)
-  if (typeof define === 'function' && (define.amd || define.tmd) ) {
+	// Set up $Class appropriately for the environment. Start with AMD or TMD(Im.js)
+	if (typeof define === 'function' && (define.amd || define.tmd) ) {
 
-    define([], factory);
+		define([], factory);
 
-  // Next for Node.js or CommonJS.
-  } else if (typeof exports !== 'undefined') {
+	// Next for Node.js or CommonJS.
+	} else if (typeof exports !== 'undefined') {
 
-    factory(exports);
+		factory(exports);
 
-  // Finally, as a browser global.
-  } else {
+	// Finally, as a browser global.
+	} else {
 
-  	factory(root);
+		factory(root);
 
-  }
+	}
 
 }(this, function(host){
 
@@ -31,7 +31,7 @@
 	isStr = function(s){return opt.call(s)=="[object String]"},
 	isFun = function(f){return opt.call(f)=="[object Function]"},
 	isObj = function(o){return opt.call(o)=="[object Object]"},
-    isArr = function(a){return opt.call(a)=="[object Array]"},
+	isArr = function(a){return opt.call(a)=="[object Array]"},
 	isSupport__proto__ = ({}).__proto__ == Object.prototype,//检验__proto__特性
 	clone = function(obj){
 		var newObj,
@@ -64,7 +64,7 @@
 			if(this && this instanceof selfConstructor){// && this.constructor == selfConstructor
 				var re = constructor.apply(this, arguments);
 				return re&&isObj(re) ? re : this;
-			}else{
+			} else {
 				return $Class['new'](selfConstructor, arguments);
 			}
 		};
@@ -72,10 +72,11 @@
 
 
 	var config = {
+		constructorName:'__',       //构造方法约定名称，默认约定为双下划线__
 		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数 设置后仅对后面声明的类有效
 		notUseNew:true,             //是否可以不使用关键字new 直接调用方法实例化对象 如：A()
 		useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
-        useMixin:true,              //是否使用让类拥有混入其他原型的方法 如：A.$mixin([C.prototype, D.prototype])
+		useMixin:true,              //是否使用让类拥有混入其他原型的方法 如：A.$mixin([C.prototype, D.prototype])
 		useSuper:true,              //是否让类有$super属性访问父类成员 如：B.$super.foo()
 		disguise:false,             //是否让代码生成的构造函数伪装成定义的__:function(){}
 		useConstructor:true         //是否使用B.$constructor来保存定义的__构造函数，这里create inherit生成的构造函数是不等于__的
@@ -83,19 +84,19 @@
 
 
 	var $Class = {
-        
-        /**
+		
+		/**
 		 * UUID方法 生成唯一的id字符串
 		 *
 		 * @param {String} [prefix] id前缀
 		 * @return {String} 唯一的id字符串
 		 * @doc
 		 */
-        uuid:function(prefix){
-            return (prefix||"cls_") + (+new Date()).toString( 32 ) + (uuid++).toString( 32 );
-        },
-        
-        
+		uuid:function(prefix){
+			return (prefix||"cls_") + (+new Date()).toString( 32 ) + (uuid++).toString( 32 );
+		},
+
+		
 		Base:null,//作用见后面赋值
 
 		/**
@@ -106,9 +107,9 @@
 		 * @doc
 		 */
 		config:function(c){
-			if(isStr(c)){
+			if (isStr(c)){
 				return config[c];
-			}else if(isObj(c)){
+			} else if (isObj(c)){
 				return config = mix(config, c);
 			}
 			return config;
@@ -116,12 +117,12 @@
 		/**
 		 * 创建一个类  混合构造函数/原型方式.
 		 *
-		 * @param {Object} data 定义类成员的对象
+		 * @param {Object} members 定义类成员的对象
 		 * @return {Function(Class)} 返回创建的类
 		 * @doc
 		 */
-		create: function(data) {
-			return $Class.inherit($Class.Base||Object, data);
+		create: function(members) {
+			return $Class.inherit($Class.Base||Object, members);
 		},
 		/**
 		 * 实例化类 可以替代 new 操作符
@@ -132,11 +133,11 @@
 		 * @doc
 		 */
 		"new":function(clas, args){
-			if(isFun(clas)){
+			if (isFun(clas)) {
 				var instance = clone(clas.prototype);
 				var re = clas.apply(instance, args||[]);
 				return re&&isObj(re) ? re : instance;
-			}else{
+			} else {
 				throw new Error('fatal error: $Class.new expects a constructor of class.');  
 			}
 		},
@@ -146,22 +147,22 @@
 		 *       但类的实例是没有任何污染的
 		 *
 		 * @param {Function(Class)} source 父类
-		 * @param {Object} [extend] 定义类成员的对象
+		 * @param {Object} [extendMembers] 定义类成员的对象
 		 * @param {Boolean} [autoSuperConstructor] 默认false 当子类被实例化时是否先执行父类构造函数
 		 * @return {Function(Class)} 返回创建的子类
 		 * @doc
 		 *
 		 * 差异：
-		 *		1.返回类 !== extend.__
+		 *		1.返回类 !== extendMembers.__
 		 *		2.不支持__proto__的浏览器下 for in 遍历实例会遍历出constructor
 		 */
-		inherit:function(source, extend, autoSuperConstructor) {
-			if(!isFun(source))return;
-			extend = extend || {};
+		inherit:function(source, extendMembers, autoSuperConstructor) {
+			if (!isFun(source)) return;
+			extendMembers = extendMembers || {};
 			autoSuperConstructor = autoSuperConstructor||config.autoSuperConstructor;
-			var defineConstructor = extend.__ || function(){};
+			var defineConstructor = extendMembers[config.constructorName] || function(){};
 			//过滤构造方法和原型方法
-			delete extend.__;
+			delete extendMembers[config.constructorName];
 			//对象冒充
 			var _constructor = function(){
 				if(autoSuperConstructor){
@@ -171,42 +172,42 @@
 				if(re && isObj(re))return re;
 			};
 
-			if(config.notUseNew){
+			if (config.notUseNew) {
 				//构造函数包裹 new A 和 A() 可以同时兼容
 				_constructor = wrapConstructor(_constructor);
 			}
-			if(config.disguise){
+			if (config.disguise) {
 				_constructor.name = defineConstructor.name;
 				_constructor.length = defineConstructor.length;
 				_constructor.toString = function(){return defineConstructor.toString()};//屏蔽了构造函数的实现
 			}
 			//维持原型链 把父类原型赋值到给构造器原型，维持原型链
-			if(isSupport__proto__){ 
+			if (isSupport__proto__) { 
 				_constructor.prototype.__proto__ = source.prototype;
-			}else{
+			} else {
 				_constructor.prototype = createPrototype(source.prototype, _constructor);
 			}
-            
+			
 			//原型扩展 把最后配置的成员加入到原型上
-			this.include(_constructor, extend);
+			this.include(_constructor, extendMembers);
 
-			if(config.useSuper){
+			if (config.useSuper) {
 				//添加父类属性
 				_constructor.$super = createPrototype(source.prototype, source);
 			}
 
-			if(config.useSuper){
+			if (config.useSuper) {
 				//添加定义的构造函数
 				_constructor.$constructor = defineConstructor;
 			}
 
-			if(config.useExtend){
-				_constructor.$extend = function(extend, execsuperc){
-					return $Class.inherit(this, extend, execsuperc);
+			if (config.useExtend) {
+				_constructor.$extend = function(extendMembers, execsuperc){
+					return $Class.inherit(this, extendMembers, execsuperc);
 				};
 			}
-            
-            if(config.useMixin){
+			
+			if (config.useMixin) {
 				_constructor.$mixin = function(protos){
 					return $Class.include(this, protos);
 				};
@@ -223,16 +224,16 @@
 		 * @doc
 		 */
 		include:function(target, protos){
-			if(!isFun(target)){target = function(){};}
-			if(isObj(protos)){
+			if (!isFun(target)) { target = function(){}; }
+			if (isObj(protos)) {
 				mix(target.prototype, protos);
-			}else if(isArr(protos)){
-                for(var i = 0; i<protos.length; i++){
-                    if(isObj(protos[i])){
-                        mix(target.prototype, protos[i]);
-                    }
-                }
-            }
+			} else if (isArr(protos)) {
+				for (var i = 0; i<protos.length; i++) {
+					if (isObj(protos[i])) {
+						mix(target.prototype, protos[i]);
+					}
+				}
+			}
 			return target;
 		},
 		/**
@@ -240,23 +241,23 @@
 		 *       此单例类与常用{}作为单例的区别：
 		 *       有前者是标准function类，需要实例化，可以拓展原型，可以继承
 		 *
-		 * @param {Object} obj 定义单例类成员的对象 
+		 * @param {Object} members 定义单例类成员的对象 
 		 * @return {Object} singletonClass 单例类
 		 * @doc
 		 */
-		singleton:function(obj){
+		singleton:function(members){
 			var singletonClass;
-			var _constructor = obj.__ || function(){};
-			return singletonClass = $Class.create(mix(obj||{}, {
-				__:function(){
-					_constructor.apply(this, arguments);
-					if(singletonClass.$instance instanceof singletonClass){
-						return singletonClass.$instance;
-					}else{
-						return singletonClass.$instance = this;
-					}
+			var _constructor = members[config.constructorName] || function(){};
+			var newMembers = {};
+			newMembers[config.constructorName] = function(){
+				_constructor.apply(this, arguments);
+				if (singletonClass.$instance instanceof singletonClass) {
+					return singletonClass.$instance;
+				} else {
+					return singletonClass.$instance = this;
 				}
-			}));
+			};
+			return singletonClass = $Class.create(mix(members||{}, newMembers));
 		},
 		/**
 		 * 克隆对象.
@@ -274,20 +275,20 @@
 		 * @doc
 		 */
 		member:function(clas){
-			if(!isFun(clas))return;
+			if (!isFun(clas)) return;
 			var member = [];
 			var m = {constructor:1};
-			for (var chain = clas.prototype; chain && chain.constructor; chain = chain.constructor.prototype){
-				for(var k in chain){
+			for (var chain = clas.prototype; chain && chain.constructor; chain = chain.constructor.prototype) {
+				for (var k in chain) {
 					m[k] = 1;
 				}
-				if(chain.constructor==clas || chain.constructor==Object){
+				if (chain.constructor==clas || chain.constructor==Object) {
 					//链为循环 或者 链到达Object 结束
 					//不在Object原型上去循环了Object.prototype.constructor == Object
 					break;
 				}
 			};
-			for(var i in m){
+			for (var i in m) {
 				member.push(i);
 			}
 			return member;
@@ -309,7 +310,7 @@
 	// 你也可以删除$Class.Base 或者 $Class.Base = null 这样就可以改变继承为 Foo <= Object
 	$Class.Base = $Class.inherit(Object);
 
-	if(host){
+	if (host) {
 		host.$Class = $Class;
 	}
 
