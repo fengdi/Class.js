@@ -1,4 +1,4 @@
-Class.js v1.4.3
+Class.js v1.4.4[![Build Status](https://travis-ci.org/fengdi/Class.js.svg?branch=master)](https://travis-ci.org/fengdi/Class.js)
 ========
 oop javascript
 
@@ -169,6 +169,7 @@ classMemberObject是定义子类的成员，其中属性__（双下划线）约�
 
 配置项及默认值：
 
+        constructorName:'__',       //构造方法约定名称，默认约定为双下划线__
 		autoSuperConstructor:false, //当子类被实例化时是否先执行父类构造函数 设置后仅对后面声明的类有效
 		notUseNew:true,             //是否可以不使用关键字new 直接调用方法实例化对象 如：A()
 		useExtend:true,             //是否使用让类拥有拓展继承的方法 如：B = A.$extend({})
