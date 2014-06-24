@@ -1,0 +1,9 @@
+{
+  "name":"Class.js",
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "scripts": {
+    "test": "mocha ./test"
+  }
+}
