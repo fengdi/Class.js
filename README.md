@@ -22,7 +22,8 @@ oop javascript
 
 		var A = $Class.create({
 			__:function(){
-				return {};        //实例化A时返回{}而不是实例,和原生一致
+				               //构造函数使用了return 并返回对象
+				return {};     //这情况和原生一致，仅返回{}而不是A的实例
 			}
 		});
 
@@ -66,7 +67,7 @@ Class.js统一的访问命名是$Class, 当你使用此库时，应该$Class.xxx
 
 #### 1.创建一个类 ####
 
-		$Class.create( classMemberObject );
+#####`$Class.create( classMemberObject );`#####
 
 classMemberObject定义类的成员，其中属性__（双下划线）约定为构造方法。
 
@@ -84,7 +85,8 @@ classMemberObject定义类的成员，其中属性__（双下划线）约定为�
 
 #### 2.创建一个子类 ####
 
-		$Class.inherit( SuperClass, subClassMemberObject);
+#####`$Class.inherit( SuperClass, subClassMemberObject);`#####
+
 SuperClass为父类，subClassMemberObject是定义子类的成员，其中属性__（双下划线）约定为构造方法。
 
 如：
@@ -97,7 +99,7 @@ SuperClass为父类，subClassMemberObject是定义子类的成员，其中属�
 
 或者使用父类提供的$extend方法：
 
-		SuperClass.$extend( subClassMemberObject )
+#####`SuperClass.$extend( subClassMemberObject )`#####
 
 subClassMemberObject是定义子类的成员，其中属性__（双下划线）约定为构造方法。
 
@@ -118,7 +120,8 @@ subClassMemberObject是定义子类的成员，其中属性__（双下划线）�
 通常使用 `A.prototype.xxx = foo;`方式拓展。
 这里提供了混入的方式：
 
-		$Class.include(Class, prototype)
+#####`$Class.include(Class, prototype)`#####
+
 如：
 
 		$Class.include(A, {
@@ -129,7 +132,7 @@ subClassMemberObject是定义子类的成员，其中属性__（双下划线）�
 #### 4.实例化某个类 ####
 实例化类通常可以用new关键字， 这里提供了new方法，效果和new是一样的。
 
-		$Class['new']( Class, [argsArray] );
+#####`$Class['new']( Class, [argsArray] );`#####
 
 Class为类，argsArray为参数（数组）
 
@@ -140,7 +143,7 @@ Class为类，argsArray为参数（数组）
 #### 5.单例类 ####
 创建一个单例类
 
-		$Class.singleton( [classMemberObject] )
+#####`$Class.singleton( [classMemberObject] )`#####
 
 classMemberObject是定义类的成员，其中属性__（双下划线）约定为构造方法。
 
@@ -154,7 +157,7 @@ classMemberObject是定义类的成员，其中属性__（双下划线）约定�
 
 #### 6.成员检测 ####
 
-		$Class.member( Class );
+#####`$Class.member( Class );`#####
 
 返回某个类的原型链上所有定义的成员名称（数组）
 如：
@@ -171,9 +174,9 @@ classMemberObject是定义类的成员，其中属性__（双下划线）约定�
 		
 #### 7.Base基类 ####
 
-		$Class.Base;
+#####`$Class.Base;`#####
 
-所有create出来的类都是继承自内置的基类`$Class.Base`， $Class.Base继承于系统环境中的Object。
+所有create出来的类都是继承自内置的基类`$Class.Base`， 而$Class.Base又继承于系统环境中的Object。
 
 如:
 
@@ -187,7 +190,7 @@ classMemberObject是定义类的成员，其中属性__（双下划线）约定�
 
 #### 8.全局配置 ####
 
-		$Class.config( [configObject|configName] )
+#####`$Class.config( [configObject|configName] )`#####
 
 配置项及默认值：
 
