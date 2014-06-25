@@ -36,7 +36,29 @@ oop javascript
 		var s1 = new S();
 		var s2 = new S();  // s1 === s2
  
+## 使用 ##
 
+#### 浏览器使用Class.js ####
+
+##### 1.script 插入 #####
+
+      <script src="class.js"></script>
+      <script>
+        //todoSomething
+      </script>
+
+##### 2.require.js调用 #####
+
+      require('class', function($Class){
+		//todoSomething
+      });
+
+#### node.js(CMD)使用Class.js ####
+
+首先使用npm安装oo-class:  `npm install oo-class`
+
+      var $Class = require('oo-class').$Class;
+      //todoSomething
 
 ## API ##
 
