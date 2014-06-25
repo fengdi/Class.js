@@ -142,7 +142,7 @@ Class为类，argsArray为参数（数组）
 
 		$Class.singleton( [classMemberObject] )
 
-classMemberObject是定义子类的成员，其中属性__（双下划线）约定为构造方法。
+classMemberObject是定义类的成员，其中属性__（双下划线）约定为构造方法。
 
 如：
 
