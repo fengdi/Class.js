@@ -196,7 +196,7 @@
 				_constructor.$super = createPrototype(source.prototype, source);
 			}
 
-			if (config.useSuper) {
+			if (config.useConstructor) {
 				//添加定义的构造函数
 				_constructor.$constructor = defineConstructor;
 			}
