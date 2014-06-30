@@ -1,6 +1,6 @@
 Class.js v1.4.4[![Build Status](https://travis-ci.org/fengdi/Class.js.svg?branch=master)](https://travis-ci.org/fengdi/Class.js)
 ========
-oop javascript
+oop javascript  IE5.5+
 
 ## 特性 ##
 
