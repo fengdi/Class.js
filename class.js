@@ -27,6 +27,7 @@
 	//不能在严谨代码模式 'use strict';
 
 	var uuid = 0,
+	epa = [],
 	opt = Object.prototype.toString,
 	isStr = function(s){return opt.call(s)=="[object String]"},
 	isFun = function(f){return opt.call(f)=="[object Function]"},
@@ -43,6 +44,18 @@
 			newObj = new noop();
 		}
 		return newObj;
+	},
+	indexOf = epa.indexOf ? 
+	function(arr, v) {
+	  return arr.indexOf(v);
+	} :
+	function(arr, v) {
+	  for (var i = 0, len = arr.length; i < len; i++) {
+	    if(v===arr[i]){
+	    	return i;
+	    }
+	  }
+	  return -1;
 	};
 	//创建一个原型对象，创建的是一次克隆
 	function createPrototype(proto, constructor) {
@@ -275,18 +288,25 @@
 		 * @doc
 		 */
 		member:function(clas){
-			if (!isFun(clas)) return;
+			if (!isFun(clas)) return [];
 			var member = [];
 			var m = {constructor:1};
+			var c = [Object];//记录防止原型链循环
+
 			for (var chain = clas.prototype; chain && chain.constructor; chain = chain.constructor.prototype) {
+
 				for (var k in chain) {
 					m[k] = 1;
 				}
-				if (chain.constructor==clas || chain.constructor==Object) {
+
+				if(-1 != indexOf(c, chain.constructor)){
 					//链为循环 或者 链到达Object 结束
 					//不在Object原型上去循环了Object.prototype.constructor == Object
 					break;
+				}else{
+					c.push(chain.constructor);
 				}
+
 			};
 			for (var i in m) {
 				member.push(i);

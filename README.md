@@ -97,6 +97,17 @@ SuperClass为父类，subClassMemberObject是定义子类的成员，其中属�
 			}
 		});
 
+另外一个用法，将其他库的类包装，让其类有前面提到的特性：
+		
+		var MyArray = $Class.inherit(Array);
+
+		var MyModel = $Class.inherit(Backbone.Model);
+
+		var MyPromise = $Class.inherit(Promise);
+
+		...
+
+
 或者使用父类提供的$extend方法：
 
 #####`SuperClass.$extend( subClassMemberObject )`#####
@@ -207,3 +218,29 @@ classMemberObject是定义类的成员，其中属性__（双下划线）约定�
 如：
 	
 	$Class.config({notUseNew:false}); //设置后，必须用new实例化对象
+
+
+#### 9.类 拓展 ####
+
+		var Foo = $Class.create({__:function(){}});
+		var Foo = $Class.inherit(Array);
+
+
+通过$Class.create或$Class.inherit等方法生成的类Foo具有下面成员和特性：
+
+成员:
+
+	Foo.$constructor  {Function}        原始构造函数   即：'__'定义的构造函数
+	
+	Foo.$extend       {Funciton}        继承           类似于$Class.inherit
+	
+	Foo.$mixin        {Funciton}        原型拓展       类似于$Class.include
+	
+	Foo.$super        {InstanceObject}  父类           相当于父类的prototype
+
+特性:
+
+	new Foo()                           标准实例化方式
+	
+	Foo()                               无new实例化方式
+
