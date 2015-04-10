@@ -173,7 +173,7 @@
 			if (!isFun(source)) return;
 			extendMembers = extendMembers || {};
 			autoSuperConstructor = autoSuperConstructor||config.autoSuperConstructor;
-			var defineConstructor = extendMembers[config.constructorName] || function(){};
+			var defineConstructor = extendMembers[config.constructorName] || source;
 			//过滤构造方法和原型方法
 			delete extendMembers[config.constructorName];
 			//对象冒充
