@@ -108,7 +108,7 @@ SuperClass为父类，subClassMemberObject是定义子类的成员，其中属�
 		...
 
 
-或者使用父类提供的$extend方法：
+或者使用父类提供的$extend方法实现继承：
 
 #####`SuperClass.$extend( subClassMemberObject )`#####
 

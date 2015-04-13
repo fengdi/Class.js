@@ -130,11 +130,15 @@
 		/**
 		 * 创建一个类  混合构造函数/原型方式.
 		 *
-		 * @param {Object} members 定义类成员的对象
+		 * @param {[Object]} members 定义类成员的对象
 		 * @return {Function(Class)} 返回创建的类
 		 * @doc
 		 */
 		create: function(members) {
+			members = members||{};
+			if(!(config.constructorName in members)){
+				members[config.constructorName] = function(){};
+			}
 			return $Class.inherit($Class.Base||Object, members);
 		},
 		/**
@@ -160,8 +164,8 @@
 		 *       但类的实例是没有任何污染的
 		 *
 		 * @param {Function(Class)} source 父类
-		 * @param {Object} [extendMembers] 定义类成员的对象
-		 * @param {Boolean} [autoSuperConstructor] 默认false 当子类被实例化时是否先执行父类构造函数
+		 * @param {[Object]} [extendMembers] 定义类成员的对象
+		 * @param {[Boolean]} [autoSuperConstructor] 默认false 当子类被实例化时是否先执行父类构造函数
 		 * @return {Function(Class)} 返回创建的子类
 		 * @doc
 		 *
